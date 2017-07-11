@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.mateus.morphing.MainActivity" >
+
+    <item
+        android:id="@+id/action_csv"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_csv"/>
+    <item
+        android:id="@+id/action_animation"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_animation"/>
+
+</menu>

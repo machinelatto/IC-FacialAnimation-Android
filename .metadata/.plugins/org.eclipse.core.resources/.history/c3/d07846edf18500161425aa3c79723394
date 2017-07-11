@@ -1,0 +1,86 @@
+package com.example.teste_cross;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.util.Log;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.Utils;
+import org.opencv.core.*;
+
+
+
+public class MainActivity extends Activity {
+	private static final String TAG = "UHUL";
+
+	 private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
+	        @Override
+	        public void onManagerConnected(int status) {
+	            switch (status) {
+	                case LoaderCallbackInterface.SUCCESS:
+	                {
+	                    Log.i(TAG, "OpenCV loaded successfully");
+	                } break;
+	                default:
+	                {
+	                    super.onManagerConnected(status);
+	                } break;
+	            }
+	        }
+	    };
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+	}
+	
+	private String save(Bitmap bitmapImage){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory,"profile.jpg");
+
+        FileOutputStream fos = null;
+        try {           
+            fos = new FileOutputStream(mypath);
+       // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+              e.printStackTrace();
+        } 
+        return directory.getAbsolutePath();
+    }
+	
+	public void make1frame(){
+		Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.imagem1);
+		Bitmap mBitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.imagem300);
+		Bitmap mBitmap3 = null;
+		
+		Mat img1 = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CvType.CV_8UC1);
+		Mat img2 = new Mat(mBitmap2.getHeight(), mBitmap2.getWidth(), CvType.CV_8UC1);
+		Mat img3 = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CvType.CV_8UC1);
+		
+		Utils.bitmapToMat(mBitmap, img1);
+		Utils.bitmapToMat(mBitmap2, img2);
+		
+		
+		Core.addWeighted(img1, 0.5, img2, 0.5, 0, img3);
+		
+		Utils.matToBitmap(img3, mBitmap3);
+		
+		save(mBitmap3);
+	}
+	
+	
+
+}
+

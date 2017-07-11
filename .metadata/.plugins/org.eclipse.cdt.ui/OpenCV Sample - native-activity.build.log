@@ -1,0 +1,7 @@
+
+**** Build of configuration Default for project OpenCV Sample - native-activity ****
+
+/bin/bash /ndk-build NDK_DEBUG=1 V=1 
+/bin/bash: /ndk-build: Arquivo ou diretório não encontrado
+
+**** Build Finished ****

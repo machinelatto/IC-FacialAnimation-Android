@@ -1,0 +1,115 @@
+package com.example.teste_cross;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.RectF;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.Toast;
+import android.widget.VideoView;
+
+import org.jcodec.api.SequenceEncoder;
+import org.jcodec.common.model.Picture;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.*;
+import org.opencv.videoio.VideoWriter;
+
+
+
+
+
+
+public class MainActivity extends Activity {
+	private static final String TAG = "UHUL";
+
+	 @SuppressWarnings("unused")
+	private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
+	        @Override
+	        public void onManagerConnected(int status) {
+	            switch (status) {
+	                case LoaderCallbackInterface.SUCCESS:
+	                {
+	                    Log.i(TAG, "OpenCV loaded successfully");
+	                } break;
+	                default:
+	                {
+	                    super.onManagerConnected(status);
+	                } break;
+	            }
+	        }
+	    };
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		if (!OpenCVLoader.initDebug()) {
+	        // Handle initialization error
+	    }
+		try {
+			makeframes();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void makeframes() throws IOException{
+		Log.i(TAG, "entrou na make1frame");
+		Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.imagem1);
+		Bitmap mBitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.imagem300);
+		Bitmap mBitmap3 = BitmapFactory.decodeResource(getResources(), R.drawable.imagem300);		
+		
+		Mat img1 = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CvType.CV_8UC3);
+		Mat img2 = new Mat(mBitmap2.getHeight(), mBitmap2.getWidth(), CvType.CV_8UC3);
+		Mat img3 = new Mat(mBitmap.getHeight(), mBitmap.getWidth(), CvType.CV_8UC3);
+		Utils.bitmapToMat(mBitmap, img1);
+		Utils.bitmapToMat(mBitmap2, img2);
+	
+		 if (img1.empty()){
+			 Log.e(TAG, "img1 não lida");
+		 }
+		
+		File file = new File(getExternalFilesDir(null), "Video.mp4"); 		 
+		SequenceEncoder encoder = new SequenceEncoder(file);
+		
+		Picture picture = Picture.create((int)mBitmap3.getWidth(), (int)mBitmap3.getHeight(), );
+		
+		for(int i = 300; i > 0; i--){
+			double alpha = (1.0 / 300) * i;
+			double beta = 1 - alpha;
+			
+			Core.addWeighted(img1, alpha, img2, beta, 0, img3);
+		
+			if (img3.empty()){
+				Log.e(TAG, "img3 não calculada");
+			}
+		 
+			Utils.matToBitmap(img3, mBitmap3);
+			
+			Canvas canvas = picture.beginRecording(mBitmap3.getWidth(), mBitmap3.getHeight());
+			canvas.drawBitmap(mBitmap3, null, new RectF(0f, 0f, (float) mBitmap3.getWidth(), (float) mBitmap3.getHeight()), null);
+			picture.endRecording();
+			
+			encoder.encodeNativeFrame(picture);			
+		}
+		VideoView videoView = (VideoView)findViewById(R.id.videoView1);
+		videoView.setVideoPath("colocar aqui o local onde salvar o video");
+		videoView.start();
+	}
+}
+	
+	
+
+
+

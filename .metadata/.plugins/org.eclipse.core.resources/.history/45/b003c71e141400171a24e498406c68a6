@@ -1,0 +1,156 @@
+package com.example.operations;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Paint;
+import android.graphics.Canvas;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+public class MainActivity extends Activity {
+	
+	protected static final String TAG = "DEBUG";
+	
+	//inicia o opencv manager
+	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+		@Override
+		public void onManagerConnected(int status) {
+			switch (status) {
+				case LoaderCallbackInterface.SUCCESS:{
+					Log.i(TAG, "OpenCV loaded successfully");
+				} break;
+				default:{
+					super.onManagerConnected(status);
+				} break;
+			}
+		}
+	};
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this,
+				mLoaderCallback);
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	private Mat M;
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_abrirImagem) {
+			M = loadImage();
+			showImage(M);
+		}
+		else if (id == R.id.action_desenhar) {
+			if(M == null){
+				Context context = getApplicationContext();
+				CharSequence text = "Abra a imagem primeiro!";
+				int duration = Toast.LENGTH_SHORT;
+				Toast toast = Toast.makeText(context, text, duration);
+				toast.show();
+				return true;
+			}
+			
+			double[] x = {104, 105, 66, 139, 106};
+			double[] y = {53,70, 60, 59, 103};
+			drawPointsOnImage(M, x, y ,5 , 1);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	private Mat loadImage(){
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inScaled = false;
+		Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.proc_papi_frame_20);
+		//Display display = getWindowManager().getDefaultDisplay();
+		//This is "android graphics Point" class
+		//Point size = new Point();
+		//display.getSize(size);
+		//int width = size.x;
+		//int height = size.y;
+		Mat rgbImage = new Mat();
+		Utils.bitmapToMat(mBitmap, rgbImage);
+		Log.i(TAG,rgbImage.size().toString());
+		Size size = new Size(rgbImage.cols()*2, rgbImage.rows()*2);
+		Mat sampledImage = new Mat();
+		//double downSampleRatio= calculateSubSampleSize(rgbImage,width,height);
+		Imgproc.resize(sampledImage, rgbImage, size);
+		return rgbImage;
+	}
+	
+	/*private static double calculateSubSampleSize(Mat srcImage, int reqWidth,int reqHeight) {
+		// Raw height and width of image
+		final int height = srcImage.height();
+		final int width = srcImage.width();
+		double inSampleSize = 1;
+		if (height > reqHeight || width > reqWidth) {
+			// Calculate ratios of requested height and width to the raw
+			//height and width
+			final double heightRatio = (double) reqHeight / (double) height;
+			final double widthRatio = (double) reqWidth / (double) width;
+			// Choose the smallest ratio as inSampleSize value, this will
+			//guarantee final image with both dimensions larger than or
+			//equal to the requested height and width.
+			inSampleSize = heightRatio<widthRatio ? heightRatio :widthRatio;
+		}
+		return inSampleSize;
+	}*/
+	
+	private void drawPointsOnImage(Mat im, double x[], double y[],int radius ,int zoom){
+		int i = 0;
+		Bitmap bitmap = Bitmap.createBitmap(im.cols(), im.rows(),Bitmap.Config.RGB_565);
+		Utils.matToBitmap(im, bitmap);
+		Canvas canvas = new Canvas(bitmap);
+		canvas.drawBitmap(bitmap, 0, 0, null);
+		Paint paint = new Paint();
+		for(i = 0; i < x.length; i++){
+			canvas.drawCircle((float)x[i]*2, (float)y[i]*2, radius, paint);
+		}
+		ImageView iv = (ImageView) findViewById(R.id.ImageView);
+		iv.setImageBitmap(bitmap);
+	}	
+	
+	private void showImage(Mat image){
+		// create a bitMap
+		Bitmap bitMap = Bitmap.createBitmap(image.cols(),
+				image.rows(),Bitmap.Config.RGB_565);
+		// convert to bitmap:
+		Utils.matToBitmap(image, bitMap);
+		// find the imageview and draw it!
+		ImageView iv = (ImageView) findViewById(R.id.ImageView);
+		iv.setImageBitmap(bitMap);
+	}
+	
+	
+}

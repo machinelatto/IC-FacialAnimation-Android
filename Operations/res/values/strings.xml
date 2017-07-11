@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Operations</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_abrirImagem">Abrir imagem</string>
+    <string name="action_desenhar">Desenhar pontos</string>
+    <string name="action_warp">Warp Dealunay</string>
+    <string name="action_morph">Morphing</string>	
+    <string name="action_morph_save">Morphing.mp4</string>
+    
+</resources>
